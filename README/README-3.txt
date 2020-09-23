@@ -1,3 +1,4 @@
+'''
 머신러닝 - 기계학습 = ML ( == Deep Learning)
 
 ML : 지도, 비지도, 강화
@@ -9,6 +10,7 @@ ML Process 4 :
 
 ML Algorism
 
+0. 뉴런(neuron)
 1. 퍼셉트론 => 뉴런 
 2. 회귀
 3. 분류 
@@ -28,7 +30,11 @@ Tensorflow
 
 비지니스 로직 - service
 processing 하는 파일명
-
+ precprocessing 
+ modeling
+ learning 
+ evaluation
+ 완성되면 submit (파일로 저장)
 
 # 외부에 있는 파이썬 파일(.py)을 import 해야 속성, 기능을 사용할 수 있다
 # 내부에서는 이것을 인스턴스라 해야한다
@@ -82,3 +88,4 @@ matrix      [[]] = {{1,2,3}, {4,5,6}}   매트릭스, 2차원 data frame, array�
 
 지도학습에서 반드시 해야할 일은 dataset을 생성하는 것이다
 그때 dataset은 반드시 train, test 두가지 형태로 작성합니다  # p.149
+'''
