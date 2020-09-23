@@ -33,6 +33,9 @@ Fare 요금,
 Embarked 승선한 항구명 C = 쉐브루, Q = 퀸즈타운, S = 사우스햄튼
 """
 
+# 메타데이터 = 스키마 =feature =variables =property
+# row ,행 ,인스턴스, raw 데이터
+
 class Service:
     def __init__(self):
         self.entity = Entity()  
@@ -201,3 +204,7 @@ class Service:
         svm = SVC()
         score = cross_val_score(svm, this.train, this.label, cv=Service.create_k_fold(), n_jobs=1, scoring='accuracy')
         return round(np.mean(score) * 100, 2)
+
+# variable x=3 스칼라
+# array [element=(varable)]
+# matrix  [[vector=(array)]] 
