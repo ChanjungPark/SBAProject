@@ -16,5 +16,5 @@ class Model:
 
 if __name__ == '__main__':
     m = Model()
-    dfname = m.new_model('price_data.csv')
-    print(dfname.head())
+    dframe = m.new_model('price_data.csv')
+    print(dframe.head())
