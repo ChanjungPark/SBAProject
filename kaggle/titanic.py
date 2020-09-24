@@ -1,8 +1,9 @@
-from titanic.entity import Entity
 import sys
 sys.path.insert(0, 'C:/ChanjungPark/SBAProject')
-import pandas as pd
+from util.file_handler import FileReader
+from sklearn.ensemble import RandomForestClassifier # rforest
 import numpy as np
+import pandas as pd
 # sklearn algorithm : classification, regression, clustring, reduction
 from sklearn.tree import DecisionTreeClassifier # dtree
 from sklearn.ensemble import RandomForestClassifier # rforest
@@ -15,9 +16,7 @@ from sklearn.model_selection import cross_val_score
 # dtree, rforest, nb, knn, svm, 
 
 """
-### : 필요없거나 편집시키거나 drop시키는 것
-PassengerId, Survived는 답이니까 바뀌거나 편집되면 X
-Ticket, Cabin은 쓰레기값
+### : 필요없거나 drop시키는 것
 
 ### PassengerId  고객ID,
 ### Survived 생존여부,  --> 머신러닝 모델이 맞춰야 할 답 
@@ -33,12 +32,22 @@ Fare 요금,
 Embarked 승선한 항구명 C = 쉐브루, Q = 퀸즈타운, S = 사우스햄튼
 """
 
+# 내부에서는 모듈의 객체를 인스턴스화해야 한다.
+# 대문자는 클래스
+# 소문자는 인스턴스= (객체)
+# 라운드 브레이스가 있는 클래스는 생성자이다.
+# 결론.. 객체지향(OOP)에서는 속성과 기능을 호출하는 구조로 
+# 두가지 방식이 있는데
+# (스태틱)클래스 객체
+# (다이나믹) 인스턴스 객체
+
 # 메타데이터 = 스키마 =feature =variables =property
 # row ,행 ,인스턴스, raw 데이터
 
-class Service:
+class Controller:
     def __init__(self):
-        self.entity = Entity()  
+        # print('TEST')
+        self.entity = FileReader()
         pass
 
     def new_model(self, payload) -> object:
@@ -213,3 +222,75 @@ class Service:
 # variable x=3 스칼라
 # array [element=(varable)]
 # matrix  [[vector=(array)]] 
+
+    def modeling(self, train, test):
+        service = self.service
+        this = self.preprocessing(train, test)
+        # print(f'훈련 컬럼 : {this.train.columns}')
+        this.label = service.create_label(this)
+        this.train = service.create_train(this)
+        print(f'>> Train 변수 : {this.train.columns}')
+        print(f'>> Test 변수 : {this.train.columns}')
+        return this
+
+    def preprocessing(self, train, test):
+        service = self.service
+        this = self.entity
+        this.train = service.new_model(train) # payload
+        this.test = service.new_model(test) # payload
+        this.id = this.test['PassengerId'] # machine이에게는 이것이 문제(question)가 됩니다.
+        # print(f'drop 전 변수 : {this.train.columns}')
+        print(f'정제 전 Train 변수 : {this.train.columns}')
+        print(f'정제 전 Test 변수 : {this.test.columns}')
+        this = service.drop_feature(this, 'Cabin')
+        this = service.drop_feature(this, 'Ticket')
+        print(f'드롭 후 변수 : {this.train.columns}')
+        this = service.embarked_norminal(this)
+        print(f'승선한 항구 정제결과: {this.train.head()}')
+        this = service.title_norminal(this)
+        print(f'타이틀 정제결과: {this.train.head()}')
+        # name 변수에서 title 을 추출했으니 name 은 필요가 없어졌고, str 이니 
+        # 후에 ML-lib 가 이를 인식하는 과정에서 에러를 발생시킬것이다.
+        # -> name 을 삭제해야 한다
+        this = service.drop_feature(this, 'Name')
+        this = service.drop_feature(this, 'PassengerId')
+        this = service.age_ordinal(this)
+        print(f'나이 정제결과: {this.train.head()}')
+        this = service.drop_feature(this, 'SibSp')
+        this = service.sex_norminal(this)
+        print(f'성별 정제결과: {this.train.head()}')
+        this = service.fareBand_nominal(this)
+        print(f'요금 정제결과: {this.train.head()}')
+        this = service.drop_feature(this, 'Fare')
+        print(f'#########  TRAIN 정제결과 ###############')
+        print(f'{this.train.head()}')
+        print(f'#########  TEST 정제결과 ###############')
+        print(f'{this.test.head()}')
+        print(f'######## train na 체크 ##########')
+        print(f'{this.train.isnull().sum()}')
+        print(f'######## test na 체크 ##########')
+        print(f'{this.test.isnull().sum()}')
+        return this
+
+    def learning(self, train, test):
+        service = self.service
+        this = self.modeling(train, test)
+        print('&&&&&&&&&&&&&&&&& Learning 결과  &&&&&&&&&&&&&&&&')
+        print(f'결정트리 검증결과: {service.accuracy_by_dtree(this)}')
+        print(f'랜덤포리 검증결과: {service.accuracy_by_rforest(this)}')
+        print(f'나이브베이즈 검증결과: {service.accuracy_by_nb(this)}')
+        print(f'KNN 검증결과: {service.accuracy_by_knn(this)}')
+        print(f'SVM 검증결과: {service.accuracy_by_svm(this)}')
+
+    def submit(self, train, test):   # machine이 됩니다. 이 단계에서는 케글에게 내 machine를 보내서 평가받게 하는 것입니다.
+        this = self.modeling(train, test)
+        clf = RandomForestClassifier()
+        clf.fit(this.train, this.label)
+        prediction = clf.predict(this.test)
+        pd.DataFrame(
+            {'PassengerId' : this.id, 'Survived' : prediction}
+        ).to_csv(this.context+'submission.csv', index=False)
+
+if __name__ == '__main__':
+    ctrl = Controller()
+    ctrl.submit('train.csv','test.csv')
