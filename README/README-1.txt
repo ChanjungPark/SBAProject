@@ -1,4 +1,3 @@
-'''
 Object = 기능(function) + 속성(Property, Attribute, Feature) => 파라미터( AI 파트 )
 하나의 { ... } 에 같이 있음
 () 라운드 {} 컬 [] 스퀘어 브레이스 는 총 3가지 (전 프로그래밍 공통)
@@ -46,4 +45,3 @@ def print_info(self):
         # self.name 과  name 은 서로 다른 존재이므로 {self.name} 과 {name} 은 서로 다른 상태이다.
 @staticmethod
 def set_contact():
-'''

@@ -1,4 +1,3 @@
-'''
 머신러닝 - 기계학습 = ML ( == Deep Learning)
 
 ML : 지도, 비지도, 강화
@@ -88,4 +87,3 @@ matrix      [[]] = {{1,2,3}, {4,5,6}}   매트릭스, 2차원 data frame, array�
 
 지도학습에서 반드시 해야할 일은 dataset을 생성하는 것이다
 그때 dataset은 반드시 train, test 두가지 형태로 작성합니다  # p.149
-'''

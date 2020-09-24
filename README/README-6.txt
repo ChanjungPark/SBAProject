@@ -1,4 +1,3 @@
-'''
 context : object(class = static, instance = dynamic) 가 존재하는 영역
 
 https://flearning-blog.tistory.com/230 참고
@@ -17,4 +16,10 @@ Server : AWS
 1.3 Controller 개발환경 : 
 
 content 를 투입... context
-'''
+==========================================================================
+이제 modeling 환경세팅 끝
+view 환경세팅 끝
+
+둘을 연결할 networking setiing
+
+cabbage

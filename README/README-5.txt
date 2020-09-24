@@ -1,4 +1,3 @@
-'''
 variable(변하는 상태) vs constant(변하지 않는 상태)
 그중에서 variable 은 분류가 가능합니다.
 분류기준을 두고, 나누는데 크게 이분하면
@@ -46,4 +45,3 @@ for(), while() 이 syntax 가 존재하는 이유.
         this.train = this.train # overriding
         this.test = this.test
         return this
-'''

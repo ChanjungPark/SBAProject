@@ -42,7 +42,7 @@ class Controller:
         this = self.preprocessing(train, test)
         # print(f'훈련 컬럼 : {this.train.columns}')
         this.label = service.create_label(this)
-        this.train = service.create_train(this)    
+        this.train = service.create_train(this)
         print(f'>> Train 변수 : {this.train.columns}')
         print(f'>> Test 변수 : {this.train.columns}')
         return this
@@ -58,7 +58,7 @@ class Controller:
         print(f'정제 전 Test 변수 : {this.test.columns}')
         this = service.drop_feature(this, 'Cabin')
         this = service.drop_feature(this, 'Ticket')
-        print(f'drop 후 변수 : {this.train.columns}')
+        print(f'드롭 후 변수 : {this.train.columns}')
         this = service.embarked_norminal(this)
         print(f'승선한 항구 정제결과: {this.train.head()}')
         this = service.title_norminal(this)

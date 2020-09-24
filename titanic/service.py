@@ -63,7 +63,7 @@ class Service:
         return this
 
     @staticmethod
-    def pclass(this) -> objects:
+    def pclass_ordinal(this) -> object:
         return this
 
     @staticmethod
