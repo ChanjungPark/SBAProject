@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 '''
-context : C:/ChanjungPark/SBAProject/
+context : C:/ChanjungPark/SBAProject
 fname : /titanic/data/
 '''
 

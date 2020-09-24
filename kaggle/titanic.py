@@ -15,6 +15,11 @@ from sklearn.model_selection import KFold  # k값은 count 로 의미로 이해
 from sklearn.model_selection import cross_val_score
 # dtree, rforest, nb, knn, svm, 
 
+'''
+context : C:/ChanjungPark/SBAProject
+fname : /kaggle/data/
+'''
+
 """
 ### : 필요없거나 drop시키는 것
 
@@ -44,14 +49,13 @@ Embarked 승선한 항구명 C = 쉐브루, Q = 퀸즈타운, S = 사우스햄�
 # 메타데이터 = 스키마 =feature =variables =property
 # row ,행 ,인스턴스, raw 데이터
 
-class Controller:
+class Service:
     def __init__(self):
-        # print('TEST')
-        self.entity = FileReader()
-        pass
+        self.fileReader = FileReader()
 
     def new_model(self, payload) -> object:
-        this = self.entity
+        this = self.fileReader
+        this.context = 'C:/ChanjungPark/SBAProject/kaggle/data/'
         this.fname = payload
         return pd.read_csv(this.context + this.fname) # p.139  df = tensor
 
@@ -223,6 +227,12 @@ class Controller:
 # array [element=(varable)]
 # matrix  [[vector=(array)]] 
 
+class Controller:
+    def __init__(self):
+        # print('TEST')
+        self.fileReader = FileReader()
+        self.service = Service()
+
     def modeling(self, train, test):
         service = self.service
         this = self.preprocessing(train, test)
@@ -235,7 +245,7 @@ class Controller:
 
     def preprocessing(self, train, test):
         service = self.service
-        this = self.entity
+        this = self.fileReader
         this.train = service.new_model(train) # payload
         this.test = service.new_model(test) # payload
         this.id = this.test['PassengerId'] # machine이에게는 이것이 문제(question)가 됩니다.
@@ -289,7 +299,7 @@ class Controller:
         prediction = clf.predict(this.test)
         pd.DataFrame(
             {'PassengerId' : this.id, 'Survived' : prediction}
-        ).to_csv(this.context+'submission.csv', index=False)
+        ).to_csv('C:/ChanjungPark/SBAProject/kaggle/data/'+'submission.csv', index=False)
 
 if __name__ == '__main__':
     ctrl = Controller()
