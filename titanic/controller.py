@@ -2,6 +2,8 @@ import sys
 sys.path.insert(0, 'C:/ChanjungPark/SBAProject')
 from titanic.entity import Entity
 from titanic.service import Service
+from sklearn.ensemble import RandomForestClassifier # rforest
+import pandas as pd
 
 """
 ### : 필요없거나 drop시키는 것
@@ -63,6 +65,7 @@ class Controller:
         print(f'타이틀 정제결과: {this.train.head()}')
         # name 변수에서 title 을 추출했으니 name 은 필요가 없어졌고, str 이니 
         # 후에 ML-lib 가 이를 인식하는 과정에서 에러를 발생시킬것이다.
+        # -> name 을 삭제해야 한다
         this = service.drop_feature(this, 'Name')
         this = service.drop_feature(this, 'PassengerId')
         this = service.age_ordinal(this)
@@ -93,9 +96,15 @@ class Controller:
         print(f'KNN 검증결과: {service.accuracy_by_knn(this)}')
         print(f'SVM 검증결과: {service.accuracy_by_svm(this)}')
 
-    def submit(self):   # machine이 됩니다. 이 단계에서는 케글에게 내 machine를 보내서 평가받게 하는 것입니다.
-        pass
+    def submit(self, train, test):   # machine이 됩니다. 이 단계에서는 케글에게 내 machine를 보내서 평가받게 하는 것입니다.
+        this = self.modeling(train, test)
+        clf = RandomForestClassifier()
+        clf.fit(this.train, this.label)
+        prediction = clf.predict(this.test)
+        pd.DataFrame(
+            {'PassengerId' : this.id, 'Survived' : prediction}
+        ).to_csv(this.context+'submission.csv', index=False)
 
 if __name__ == '__main__':
     ctrl = Controller()
-    ctrl.modeling('train.csv','test.csv')
+    ctrl.submit('train.csv','test.csv')
