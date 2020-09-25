@@ -4,10 +4,23 @@ from util.file_handler import FileReader
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from dataclasses import dataclass
 
+@dataclass
 class Model:
+    # year,avgTemp,minTemp,maxTemp,rainFall,avgPrice
+    # 20100101,-4.9,-11,0.9,0,2123
+    # 멤버 변수
+    year: int = 0
+    avgTemp: float = 0.0
+    minTemp: float = 0.0
+    maxTemp: float = 0.0
+    rainFall: int = 0.0
+    avgPrice: int = 0
+
+    # 클래스 내부에서 공유하는 객체, 상수값
     def __init__(self):
-        self.fileReader = FileReader()
+        self.fileReader = FileReader()  # 변하지 않는 값. 기능은 상수로 처리한다.
         self.context = 'C:/ChanjungPark/SBAProject/price_prediction/data/'
     
     def new_model(self, payload) -> object:
@@ -31,8 +44,7 @@ class Model:
         sess = tf.compat.v1.Session()
         sess.run(tf.compat.v1.global_variables_initializer())
         for step in range(100000):
-            cost_, hypo_, _ = sess.run([cost, hyposthesis, train],
-                                        feed_dict={X: x_data, Y: y_data})
+            cost_, hypo_, _ = sess.run([cost, hyposthesis, train], feed_dict={X: x_data, Y: y_data})
             if step % 500 == 0:
                 print(f'# {step} 손실비용: {cost_} ')
                 print(f'- 배추가격 : {hypo_[0]}')
@@ -41,8 +53,45 @@ class Model:
         saver.save(sess, self.context+'saved_model.ckpt')
         print('저장완료')
 
+    def test(self):
+        self.avgPrice = 100
+        print(self.avgPrice)
+
+    def service(self):
+        X = tf.compat.v1.placeholder(tf.float32, shape=[None, 4])
+        # year,avgTemp,minTemp,maxTemp,rainFall,avgPrice
+        # 에서 avgTemp,minTemp,maxTemp,rainFall 입력받겠습니다
+        # year 은 모델에서 필요없는 값 -> 상관관계 없음
+        # avgPrice 는 얻고자 하는 답 - 종속변수
+        # avgTemp,minTemp,maxTemp,rainFall 은 종속변수를 결정하는 독립변수
+        # 그리고 avgPrice 를 결정하는 요소로 사용되는 파라미터 <- 이게 중요!!
+        # 이제 통계와 확률로 들어가야 합니다. 용어를 먼저 잘 정의해야 합니다.
+        # y = ax + b <- 선형 관계 linear...
+        # X 는 대문자를 사용하고 확률변수라고 합니다.
+        # 비교. 웹프로그래밍(Java, C)에서 소문자 x는 한 타임에 하나의 value
+        # 그리고 그 값은 외부에서 주어지는 하나의 값이므로 그냥 변수
+        # 지금은 X 의 값이 제한적이지만 집합 상태로 많은 값이 있는 상태
+        # 이럴때는 확률 변수
+        W = tf.Variable(tf.random.normal([4,1]), name='weight')
+        b = tf.Variable(tf.random.normal([1]), name='bias')
+        # 텐서플로에서 변수는 웹에서 변수와 다릅니다.
+        # 이 변수를 결정하는 것은 외부값이 아니라 텐서가 내부에서 사용하는 변수입니다.
+        # 기존 웹에서 사용하는 변수는 placeholder입니다.
+
+        saver = tf.train.Saver()
+        with tf.Session() as sess:
+            sess.run(tf.compat.v1.global_Variables_initalizer())
+            saver.restore(sess, self.context + 'saved_model.ckpt')
+            data = [[self.avgPrice, self.minTemp, self.maxTemp, self.rainFall],]
+            arr = np.array(data, dtype=np.float32)
+            # Y = WX + b 를 식으로 표현하면 아래와 같이 표현됩니다.
+            dict = sess.run(tf.matmul(X,W) + b, {X: arr[0:4]})           
+            print(dict[0])
+        return int(dict[0])
+
 if __name__ == '__main__':
     m= Model()
-    dframe = m.new_model('price_data.csv')
-    print(dframe.head())
-    m.create_tf(dframe)
+    # dframe = m.new_model('price_data.csv')
+    # print(dframe.head())
+    # m.create_tf(dframe)
+    print(m.test())
