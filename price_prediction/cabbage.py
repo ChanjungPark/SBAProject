@@ -7,7 +7,7 @@ import tensorflow as tf
 from dataclasses import dataclass
 
 @dataclass
-class Model:
+class Cabbage:
     # year,avgTemp,minTemp,maxTemp,rainFall,avgPrice
     # 20100101,-4.9,-11,0.9,0,2123
     # 멤버 변수
@@ -44,7 +44,8 @@ class Model:
         sess = tf.compat.v1.Session()
         sess.run(tf.compat.v1.global_variables_initializer())
         for step in range(100000):
-            cost_, hypo_, _ = sess.run([cost, hyposthesis, train], feed_dict={X: x_data, Y: y_data})
+            cost_, hypo_, _ = sess.run([cost, hyposthesis, train],
+                                        feed_dict={X: x_data, Y: y_data})
             if step % 500 == 0:
                 print(f'# {step} 손실비용: {cost_} ')
                 print(f'- 배추가격 : {hypo_[0]}')
@@ -55,9 +56,10 @@ class Model:
 
     def test(self):
         self.avgPrice = 100
-        print(self.avgPrice)
+        return self.avgPrice
 
     def service(self):
+        print('##########  Service ############')
         X = tf.compat.v1.placeholder(tf.float32, shape=[None, 4])
         # year,avgTemp,minTemp,maxTemp,rainFall,avgPrice
         # 에서 avgTemp,minTemp,maxTemp,rainFall 입력받겠습니다
@@ -80,18 +82,19 @@ class Model:
 
         saver = tf.train.Saver()
         with tf.Session() as sess:
-            sess.run(tf.compat.v1.global_Variables_initalizer())
-            saver.restore(sess, self.context + 'saved_model.ckpt')
-            data = [[self.avgPrice, self.minTemp, self.maxTemp, self.rainFall],]
-            arr = np.array(data, dtype=np.float32)
+            sess.run(tf.compat.v1.global_variables_initializer())
+            saver.restore(sess, self.context+'saved_model.ckpt')
+            print(f'avgTemp :{self.avgTemp} , minTemp: {self.minTemp}, maxTemp: {self.maxTemp}, rainFall: {self.rainFall}')
+            data = [[self.avgTemp, self.minTemp, self.maxTemp, self.rainFall],]
+            arr = np.array(data, dtype = np.float32)
             # Y = WX + b 를 식으로 표현하면 아래와 같이 표현됩니다.
-            dict = sess.run(tf.matmul(X,W) + b, {X: arr[0:4]})           
+            dict = sess.run(tf.matmul(X, W) + b, {X: arr[0:4]})           
             print(dict[0])
         return int(dict[0])
 
 if __name__ == '__main__':
-    m= Model()
+    cabbage= Cabbage()
     # dframe = m.new_model('price_data.csv')
     # print(dframe.head())
     # m.create_tf(dframe)
-    print(m.test())
+    print(cabbage.test())
