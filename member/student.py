@@ -7,12 +7,13 @@ class Student:
     birth: str = ''
     regdate: str = ''
 
-    def __init__(self):
-        self.conn = sqlite3.connect('sqlite.db')
-        self.cursor = conn.cursor()
-
+# DAO : Database Access Object
 class StudentDao:
     
+    def __init__(self):
+        self.conn = sqlite3.connect('sqlite.db')
+        self.cursor = self.conn.cursor()
+
     def create(self):
         # cursor(커서) : 데이터베이스 작업을 수행하고 있는 메모리 공간
         cursor = self.cursor
@@ -42,7 +43,7 @@ class StudentDao:
         # ?: place holder : 치환되어야 할 어떤 대상
         # 데이터 유형에 상관없이 외따옴표 적지 마라
         sql = """
-            insert into student(id, pwd, name, birth) values (?, ?, ?, ?)
+            insert into students(id, pwd, name, birth) values (?, ?, ?, ?)
         """
         cursor.executemany(sql, data)
         self.conn.commit()
@@ -117,7 +118,11 @@ class StudentDao:
         # conn.close()  # web 상에서는 close 하지 않음
 
 class StudentService:
-    dao = StudentDao()
+    def __init__(self):
+        self.dao = StudentDao()
 
-    def add_students(self):
-        dao.insert_many()
+    def add_student(self, student):
+        print('### add_student ###')
+        self.dao.create()
+        self.dao.insert_many()
+        print(f'>>> 입력된 학생들의 수 : {self.dao.fetch_count()}')
