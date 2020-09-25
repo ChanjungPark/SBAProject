@@ -1,0 +1,2 @@
+model_checkpoint_path: "C:/ChanjungPark/SBAProject/price_prediction/data/saved_model.ckpt"
+all_model_checkpoint_paths: "C:/ChanjungPark/SBAProject/price_prediction/data/saved_model.ckpt"
