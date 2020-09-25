@@ -13,6 +13,9 @@
     <title>Document</title>
 </head>
 <body>
+    {% if name %}
+    <p>{{name}} 접속중입니다.</p>
+    {% endif %}
     <h1>배추가격 예측 시스템</h1>
     <form action="/cabbage" method="POST">
     <!--avgTemp,minTemp,maxTemp,rainFall 변수 4개를 입력받아서 예측값 하나를 받아야 합니다 -->
@@ -22,8 +25,8 @@
         강수량: <input type="text" name="rainFall"> <br/>
         <input type="submit" value="전송">
     </form>
-    {% if result %}
-    <p>예상가격 : {{result}}</p>
-    {% endif %}
+   {% if result %}
+   <p>예상가격 : {{result}} </p>
+   {% endif %}
 </body>
 </html>

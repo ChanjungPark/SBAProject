@@ -9,7 +9,7 @@ class Student:
 
 # DAO : Database Access Object
 class StudentDao:
-    
+
     def __init__(self):
         self.conn = sqlite3.connect('sqlite.db')
         self.cursor = self.conn.cursor()
@@ -32,7 +32,7 @@ class StudentDao:
     def insert_one(self, student):
         cursor = self.cursor
         sql = """
-            insert into student(id, pwd, name, birth) values (?, ?, ?, ?)
+            insert into students(id, pwd, name, birth) values (?, ?, ?, ?)
         """
         cursor.execute(sql, (student.id, student.pwd, student.name, student.birth))
         self.conn.commit()
@@ -96,7 +96,8 @@ class StudentDao:
         select * from  students where id like ? and pwd like ?
         """
         cursor.execute(sql, (id, pwd))
-        return cursor.fetchone()
+        temp = cursor.fetchone()
+        return temp[2]
         
     def update(self, id, name):
         # 'id'가 'lee'인 친구의 이름을 '이문세'로 바꾸세요.
@@ -125,4 +126,7 @@ class StudentService:
         print('### add_student ###')
         self.dao.create()
         self.dao.insert_many()
-        print(f'>>> 입력된 학생들의 수 : {self.dao.fetch_count()}')
+        print(f'>>> 입력된 학생들의 수: {self.dao.fetch_count()}')
+
+    def login(self, id, pwd):
+        return self.dao.login(id, pwd)
