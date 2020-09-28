@@ -32,7 +32,7 @@ class StudentDao:
     def insert_one(self, student):
         cursor = self.cursor
         sql = """
-            insert into students(id, pwd, name, birth) values (?, ?, ?, ?)
+            insert into students(id, pwd, name, birth) values (%s, %s, %s, %s)
         """
         cursor.execute(sql, (student.id, student.pwd, student.name, student.birth))
         self.conn.commit()
@@ -43,7 +43,7 @@ class StudentDao:
         # ?: place holder : 치환되어야 할 어떤 대상
         # 데이터 유형에 상관없이 외따옴표 적지 마라
         sql = """
-            insert into students(id, pwd, name, birth) values (?, ?, ?, ?)
+            insert into students(id, pwd, name, birth) values (%s, %s, %s, %s)
         """
         cursor.executemany(sql, data)
         self.conn.commit()
@@ -74,14 +74,14 @@ class StudentDao:
     def fetch_by_name(self, name):
         cursor = self.cursor
         sql = """
-            select * from students where name like '%?%'
+            select * from students where name like %s
         """
-        cursor.execute(sql, (name))
+        cursor.execute(sql, ('%' + name + '%',))
         return cursor.fetchall() 
 
     def fetch_count(self):
         cursor = self.cursor
-        sql = """select count(*) from students"""
+        sql = """select count(*) as cnt from students"""
         cursor.execute(sql)
         return cursor.fetchone()
 
@@ -93,7 +93,7 @@ class StudentDao:
     def login(self, id, pwd):
         cursor = self.cursor
         sql = """
-        select * from  students where id like ? and pwd like ?
+        select * from  students where id like %s and pwd like %s
         """
         cursor.execute(sql, (id, pwd))
         temp = cursor.fetchone()
@@ -102,7 +102,7 @@ class StudentDao:
     def update(self, id, name):
         # 'id'가 'lee'인 친구의 이름을 '이문세'로 바꾸세요.
         cursor = self.cursor
-        sql = """update students set name = ? where id = ?"""
+        sql = """update students set name = %s where id = %s"""
         cursor.execute(sql, (id, name))
         print(cursor.rowcount) # 성공 여부
         self.conn.commit()
@@ -110,13 +110,13 @@ class StudentDao:
     def delete(self, id):
         # 'id' 데이터를 삭제하세요.
         cursor = self.cursor
-        sql = """delete from students where id = ?"""
-        cursor.execute(sql, (id))
+        sql = """delete from students where id = %s"""
+        cursor.execute(sql, (id,))
         print(cursor.rowcount)
         self.conn.commit()
 
         # cursor.close()
-        # conn.close()  # web 상에서는 close 하지 않음
+        # conn.close() web 상에서는 close 하지 않음
 
 class StudentService:
     def __init__(self):

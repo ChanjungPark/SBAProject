@@ -47,7 +47,7 @@ def cabbage():
 
 @app.route('/signup', methods=['POST'])
 def signup():
-    print('#####  SIGNUP #####')
+    print(' ######  SIGNUP #########')
     id = request.form['id']
     pwd = request.form['pwd']
     name = request.form['name']
@@ -63,7 +63,7 @@ def signup():
 
 @app.route('/signin', methods=['POST'])
 def signin():
-    print('#####  SIGNIN #####')
+    print(' ######  SIGNIN #########')
     id = request.form['id']
     pwd = request.form['pwd']
     service = StudentService()

@@ -28,7 +28,7 @@ class Controller:
 
     @staticmethod
     def loop1():
-        sentence = '세일즈 우먼인 아름다운 그녀가 아버지 가방에 들어 가시나 ㅎㅎ'
+        sentence = '일등급 품질인 맛있는 딸기가 비닐 하우스에 들어가시나 ㅎㅎ'
         Service.sentence_pos(sentence)
         Service.pos_to_noun(sentence)
 

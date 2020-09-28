@@ -1,9 +1,12 @@
+import os
 import sys
-sys.path.insert(0, 'C:/ChanjungPark/SBAProject')
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from util.file_handler import FileReader
 from sklearn.ensemble import RandomForestClassifier # rforest
 import numpy as np
 import pandas as pd
+from config import basedir
 # sklearn algorithm : classification, regression, clustring, reduction
 from sklearn.tree import DecisionTreeClassifier # dtree
 from sklearn.ensemble import RandomForestClassifier # rforest
@@ -51,24 +54,24 @@ Embarked 승선한 항구명 C = 쉐브루, Q = 퀸즈타운, S = 사우스햄�
 
 class Service:
     def __init__(self):
-        self.fileReader = FileReader()
-
+        self.fileReader = FileReader()  
+        self.kaggle = os.path.join(basedir, 'kaggle')
+        self.data = os.path.join(self.kaggle, 'data')
+    
     def new_model(self, payload) -> object:
         this = self.fileReader
-        this.context = 'C:/ChanjungPark/SBAProject/kaggle/data/'
+        this.data = self.data
         this.fname = payload
-        return pd.read_csv(this.context + this.fname) # p.139  df = tensor
+        return pd.read_csv(os.path.join(self.data, this.fname)) # p.139  df = tensor
 
     @staticmethod
     def create_train(this) -> object:
         return this.train.drop('Survived', axis=1) # train 은 답이 제거된 데이터셋이다. 
 
-    #self 없이 create_label 기능 만들기
     @staticmethod
     def create_label(this) -> object:
         return this.train['Survived'] # label 은 곧 답이 된다.
 
-    # self 없이 차원축소 하기위해 drop_feature 기능 만들기
     @staticmethod
     def drop_feature(this, feature) -> object:
         this.train = this.train.drop([feature], axis = 1)
@@ -80,30 +83,8 @@ class Service:
         return this
 
     @staticmethod
-    def title_norminal(this) -> object: # name을 title로
-        combine = [this.train, this.test]
-        for dataset in combine:
-            # . 앞에 있는 영어를 뽑아내라 ex) Mr.
-            dataset['Title'] = dataset.Name.str.extract('([A-Za-z]+)\.', expand=False)  # A-Za-z 는 영어, ㄱ-힣 은 한글, \. 은 .
-        for dataset in combine:
-            dataset['Title'] = dataset['Title'].replace(['Capt','Col','Don','Dr','Major','Rev','Jonkheer','Dona', 'Mme'], 'Rare')
-            dataset['Title'] = dataset['Title'].replace(['Countess','Lady','Sir'], 'Royal')
-            dataset['Title'] = dataset['Title'].replace('Ms','Miss')
-            dataset['Title'] = dataset['Title'].replace('Mlle','Mr')
-        title_mapping = {'Mr':1, 'Miss': 2, 'Mrs': 3, 'Master': 4, 'Royal': 5, 'Rare': 6}
-        for dataset in combine:
-            dataset['Title'] = dataset['Title'].map(title_mapping)
-            dataset['Title'] = dataset['Title'].fillna(0) # Unknown
-        this.train = this.train
-        this.test = this.test
-        return this
-
-    @staticmethod
     def sex_norminal(this) -> object:
-        # male = 0, female = 1
-        # train과 test를 일일히 써줄 필요 없이 하나로 묶어 작성하기 위해 combine 변수, for문을 사용하겠음
-        # for문으로 둘 다 한번에 작성한 후 오버라이팅하면 한번에 둘다 작성할 수 있다
-        combine = [this.train, this.test] # train과 test를 하나의 객체로 묶어 쓸 수 있다
+        combine = [this.train, this.test] # train과 test 가 묶입니다. 
         sex_mapping = {'male':0, 'female':1}
         for dataset in combine:
             dataset['Sex'] = dataset['Sex'].map(sex_mapping)
@@ -117,12 +98,13 @@ class Service:
         test = this.test 
         train['Age'] = train['Age'].fillna(-0.5)
         test['Age'] = test['Age'].fillna(-0.5)
-        # age 를 평균으로 넣기 애매하고, 다수결로 넣기도 너무 근거가 없다
-        # 특히 age는 생존률 판단에서 가중치(weigth)가 상당하므로 디테일한 접근이 필요합니다.
-        # 나이를 모르는 승객은 모르는 상태로 처리해야 값의 왜곡을 줄일수 있어서 
-        # -0.5 라는 중간값으로 처리했습니다.
-        bins = [-1, 0, 5, 12, 18, 24, 35, 60, np.inf] # []에 있으니 이 파트는 범위를 뜻합니다.
-        # -1 이상 0 미만....60이상 기타 ...
+         # age 를 평균으로 넣기도 애매하고, 다수결로 넣기도 너무 근거가 없다...
+         # 특히 age 는 생존률 판단에서 가중치(weigth)가 상당하므로 디테일한 접근이 필요합니다.
+         # 나이를 모르는 승객은 모르는 상태로 처리해야 값의 왜곡을 줄일수 있어서 
+         # -0.5 라는 중간값으로 처리했습니다.
+        bins = [-1, 0, 5, 12, 18, 24, 35, 60, np.inf] # 이 파트는 범위를 뜻합니다.
+         # -1 이상 0 미만....60이상 기타 ...
+         # [] 에 있으니 이것은 변수명이겠군요..라고 판단하셨으면 잘 이해한 겁니다.
         labels = ['Unknown', 'Baby', 'Child', 'Teenager','Student','Young Adult', 'Adult', 'Senior']
         # [] 은 변수명으로 선언되었음
         train['AgeGroup'] = pd.cut(train['Age'], bins, labels=labels)
@@ -136,9 +118,9 @@ class Service:
             5: 'Young Adult',
             6: 'Adult',
             7: 'Senior'
-        } # 이렇게 []에서 {} 으로 처리하면 labels 를 값으로 처리
+        } # 이렇게 []에서 {} 으로 처리하면 labels 를 값으로 처리하겠네요.
         for x in range(len(train['AgeGroup'])):
-            if train['AgeGroup'][x] == 'Unknown':    # [x] 추가해 차원이 하나 늘어나면서 행렬 구조로 바뀜
+            if train['AgeGroup'][x] == 'Unknown':
                 train['AgeGroup'][x] = age_title_mapping[train['Title'][x]]
         for x in range(len(test['AgeGroup'])):
             if test['AgeGroup'][x] == 'Unknown':
@@ -170,7 +152,7 @@ class Service:
 
     @staticmethod
     def fare_ordinal(this) -> object:
-        this.train['FareBand'] = pd.qcut(this['Fare'], 4, labels={1,2,3,4}) # {}-> 로우데이터(변수 값을 넣음), [] : 메타데이터(변수 명을 넣음)
+        this.train['FareBand'] = pd.qcut(this['Fare'], 4, labels={1,2,3,4})
         this.test['FareBand'] = pd.qcut(this['Fare'], 4, labels={1,2,3,4})
         return this
 
@@ -186,10 +168,26 @@ class Service:
         this.test = this.test.fillna({'Embarked': 'S'}) # 교과서 144
         # 많은 머신러닝 라이브러리는 클래스 레이블이 *정수* 로 인코딩 되었다고 기대함
         # 교과서 146 문자 blue = 0, green = 1, red = 2 로 치환 -> mapping 합니다.
-        # ordinal 아님 걍 값 준거
-        # 숫자를 인지하기 때문에 임의의 숫자값을 준 것
         this.train['Embarked'] = this.train['Embarked'].map({'S': 1, 'C' : 2, 'Q' : 3}) # ordinal 아닙니다.
         this.test['Embarked'] = this.test['Embarked'].map({'S': 1, 'C' : 2, 'Q' : 3})
+        return this
+
+    @staticmethod
+    def title_norminal(this) -> object:
+        combine = [this.train, this.test]
+        for dataset in combine:
+            dataset['Title'] = dataset.Name.str.extract('([A-Za-z]+)\.', expand=False)
+        for dataset in combine:
+            dataset['Title'] = dataset['Title'].replace(['Capt','Col','Don','Dr','Major','Rev','Jonkheer','Dona', 'Mme'], 'Rare')
+            dataset['Title'] = dataset['Title'].replace(['Countess','Lady','Sir'], 'Royal')
+            dataset['Title'] = dataset['Title'].replace('Ms','Miss')
+            dataset['Title'] = dataset['Title'].replace('Mlle','Mr')
+        title_mapping = {'Mr':1, 'Miss': 2, 'Mrs': 3, 'Master': 4, 'Royal': 5, 'Rare': 6}
+        for dataset in combine:
+            dataset['Title'] = dataset['Title'].map(title_mapping)
+            dataset['Title'] = dataset['Title'].fillna(0) # Unknown
+        this.train = this.train
+        this.test = this.test
         return this
 
     # Learning Algorithm 중에서 dtree, rforest, nb, knn, svm 이것을 대표로 사용하겠습니다.
@@ -223,20 +221,16 @@ class Service:
         score = cross_val_score(svm, this.train, this.label, cv=Service.create_k_fold(), n_jobs=1, scoring='accuracy')
         return round(np.mean(score) * 100, 2)
 
-# variable x=3 스칼라
-# array [element=(varable)]
-# matrix  [[vector=(array)]] 
-
 class Controller:
     def __init__(self):
-        # print('TEST')
-        self.fileReader = FileReader()
+        self.fileReader = FileReader()  
+        self.kaggle = os.path.join(basedir, 'kaggle')
+        self.data = os.path.join(self.kaggle, 'data')
         self.service = Service()
 
     def modeling(self, train, test):
         service = self.service
         this = self.preprocessing(train, test)
-        # print(f'훈련 컬럼 : {this.train.columns}')
         this.label = service.create_label(this)
         this.train = service.create_train(this)
         print(f'>> Train 변수 : {this.train.columns}')
@@ -248,8 +242,7 @@ class Controller:
         this = self.fileReader
         this.train = service.new_model(train) # payload
         this.test = service.new_model(test) # payload
-        this.id = this.test['PassengerId'] # machine이에게는 이것이 문제(question)가 됩니다.
-        # print(f'drop 전 변수 : {this.train.columns}')
+        this.id = this.test['PassengerId'] # machine 이에게는 이것이 question 이 됩니다. 
         print(f'정제 전 Train 변수 : {this.train.columns}')
         print(f'정제 전 Test 변수 : {this.test.columns}')
         this = service.drop_feature(this, 'Cabin')
@@ -261,7 +254,6 @@ class Controller:
         print(f'타이틀 정제결과: {this.train.head()}')
         # name 변수에서 title 을 추출했으니 name 은 필요가 없어졌고, str 이니 
         # 후에 ML-lib 가 이를 인식하는 과정에서 에러를 발생시킬것이다.
-        # -> name 을 삭제해야 한다
         this = service.drop_feature(this, 'Name')
         this = service.drop_feature(this, 'PassengerId')
         this = service.age_ordinal(this)
@@ -281,7 +273,7 @@ class Controller:
         print(f'######## test na 체크 ##########')
         print(f'{this.test.isnull().sum()}')
         return this
-
+        
     def learning(self, train, test):
         service = self.service
         this = self.modeling(train, test)
@@ -292,15 +284,16 @@ class Controller:
         print(f'KNN 검증결과: {service.accuracy_by_knn(this)}')
         print(f'SVM 검증결과: {service.accuracy_by_svm(this)}')
 
-    def submit(self, train, test):   # machine이 됩니다. 이 단계에서는 케글에게 내 machine를 보내서 평가받게 하는 것입니다.
+    def submit(self, train, test): # machine 이 된다. 이 단계는 캐글에게 내 머신이를 보내서 평가받게 하는 것 입니다. 마치 수능장에 자식보낸 부모님 마음 ...
         this = self.modeling(train, test)
         clf = RandomForestClassifier()
         clf.fit(this.train, this.label)
         prediction = clf.predict(this.test)
         pd.DataFrame(
             {'PassengerId' : this.id, 'Survived' : prediction}
-        ).to_csv('C:/ChanjungPark/SBAProject/kaggle/data/'+'submission.csv', index=False)
+        ).to_csv(os.path.join(self.data, 'submission.csv'), index=False)
 
 if __name__ == '__main__':
+    print(f'********* {basedir} *********')
     ctrl = Controller()
     ctrl.submit('train.csv','test.csv')
